@@ -1,6 +1,0 @@
-show_progress 0.1 0
-
-show_progress 0.5 0
-copy_dir PACKAGE:system SYSTEM:
-
-show_progress 0.1 10
