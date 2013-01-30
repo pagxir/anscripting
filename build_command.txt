@@ -1,15 +1,41 @@
-build update.zip:
-	make otapackage
+otapackage:
+============================================================
+make otapackage
 
+signature file path:
+============================================================
 out/host/linux-x86/framework/signapk.jar
 build/target/product/security/testkey.x509.pem
 build/target/product/security/testkey.pk8  
 
 build recovery.img:
+============================================================
 	out/host/linux-x86/bin/mkbootfs out/target/product/android_product/recovery/root | out/host/linux-x86/bin/minigzip > out/target/product/android_product/ramdisk-recovery.img
 	mediatek/build/tools/mkimage out/target/product/android_product/ramdisk-recovery.img RECOVERY > out/target/product/android_product/ramdisk_recovery.img
 	mv out/target/product/android_product/ramdisk_recovery.img out/target/product/android_product/ramdisk-recovery.img
 	out/host/linux-x86/bin/mkbootimg  --kernel out/target/product/android_product/kernel  --ramdisk out/target/product/android_product/ramdisk-recovery.img --output out/target/product/android_product/recovery.img
 	out/host/linux-x86/bin/mkbootimg  --kernel out/target/product/android_product/kernel  --ramdisk out/target/product/android_product/ramdisk-recovery.img --board RCG43003 --output out/target/product/android_product/recovery.img
 
+
+build update.zip:
+============================================================
+#!/bin/sh
+export FILE=out/target/product/jrdsh77_cu_jb
+
+mkdir -p update/fs
+cp -rf $FILE/root/* update/fs
+cp -rf $FILE/system update/fs
+cp -rf $FILE/data update
+rm -rf update/fs/{sys,data,proc,dev}
+
+mkdir -p update/META-INF/com/google/android
+cp -rf $FILE/system/bin/updater update/META-INF/com/google/android/update-binary
+
+chmod -R 777 update
+
+#for system data and kernel
+cd update/
+zip -ry update.zip META-INF/ fs/ data/ uImage
+echo "please wait ..........."
+signapk.sh update.zip
 
